@@ -274,7 +274,7 @@ if df is not None:
 
     st.markdown("---")
 
-    # Row 4
+    # Row 4 (Adding new plot here)
     col_plot7, col_plot8 = st.columns(2)
 
     with col_plot7:
@@ -291,7 +291,78 @@ if df is not None:
             plt.close(fig8)
 
     with col_plot8:
-        st.write("Further analysis or additional plots can be added here!")
+        st.subheader("Daily Orders Trend by Pizza Category")
+        daily_category_orders = filtered_df.groupby([filtered_df['order_date'].dt.date, 'pizza_category'])['order_id'].nunique().reset_index()
+        daily_category_orders.columns = ['Order_Date', 'Pizza_Category', 'Total_Orders']
+        daily_category_orders['Order_Date'] = pd.to_datetime(daily_category_orders['Order_Date'])
+
+        if daily_category_orders.empty:
+            st.warning("No daily orders by category data based on current filters.")
+        else:
+            fig9, ax9 = plt.subplots(figsize=(10, 6))
+            sns.lineplot(x='Order_Date', y='Total_Orders', hue='Pizza_Category', data=daily_category_orders, marker='o', ax=ax9)
+            ax9.set_title('Daily Orders Trend by Pizza Category')
+            ax9.set_xlabel('Date')
+            ax9.set_ylabel('Total Orders')
+            ax9.tick_params(axis='x', rotation=45)
+            ax9.legend(title='Pizza Category', bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax9.grid(True)
+            plt.tight_layout()
+            st.pyplot(fig9)
+            plt.close(fig9)
+
+    st.markdown("---")
+    st.header("💡 Strategies to Boost Pizza Sales")
+    st.write("Based on the data and common business practices, here are some actionable suggestions:")
+
+    with st.expander("🚀 Promote Best Sellers & Address Underperformers"):
+        st.markdown("""
+        * **Feature Top-Selling Pizzas:**
+            * Run limited-time promotions (e.g., "Buy one 'The Classic Deluxe', get 20% off 'The Barbecue Chicken Pizza'").
+            * Create combo deals that include top performers (e.g., "Family Feast: 2 'The Pepperoni Pizza' + Sides").
+            * Highlight them prominently on your menu and marketing materials.
+        * **Revitalize Bottom-Selling Pizzas:**
+            * Analyze if their ingredients are unpopular or if they are priced too high.
+            * Introduce "Chef's Special" versions with new twists or limited-time ingredient swaps.
+            * Offer them as a low-cost add-on or sample with larger orders.
+            * Consider temporary price reductions to increase trial.
+        """)
+
+    with st.expander("⏰ Optimize for Hourly & Daily Trends"):
+        st.markdown("""
+        * **Boost Off-Peak Hours:**
+            * Implement "Happy Hour" deals (e.g., discounts on selected pizzas/drinks) during slower times (e.g., 2 PM - 5 PM).
+            * Offer delivery-only specials during lunch lulls.
+            * Run online-exclusive promotions for slower hours.
+        * **Maximize Peak Hours:**
+            * Ensure adequate staffing during busiest periods (e.g., 6 PM - 9 PM) to maintain quick service and customer satisfaction.
+            * Streamline order processing and delivery logistics to handle high volume.
+            * Consider premium pricing for certain items during peak demand if customer tolerance allows.
+        * **Target Specific Days:**
+            * If weekends are dominant, focus marketing efforts on building weekday sales with unique promotions (e.g., "Tuesday Two-for-One").
+            * Analyze specific weekday lulls for targeted promotions.
+        """)
+
+    with st.expander("📊 Leverage Category & Size Insights"):
+        st.markdown("""
+        * **Category-Specific Campaigns:**
+            * If 'Veggie' pizzas are popular, launch a "Meatless Monday" promotion or a "Build Your Own Veggie" special.
+            * If 'Chicken' pizzas are doing well, introduce new chicken-based pizza variations.
+        * **Size-Based Deals:**
+            * Since 'Large' pizzas often dominate, create family meal bundles centered around large pizzas.
+            * Promote smaller sizes for individual diners or as a lunch special.
+            * Consider introducing new sizes if there's a market gap (e.g., a mini-pizza for kids).
+        """)
+
+    with st.expander("🗓️ Strategic Monthly Promotions"):
+        st.markdown("""
+        * **Boost Slower Months:**
+            * Identify historically slower months (e.g., September, December, based on the monthly trend) and plan aggressive marketing campaigns or new menu launches for those periods.
+            * Offer seasonal pizzas or limited-time flavors that align with holidays or seasonal ingredients.
+        * **Reinforce Peak Months:**
+            * Capitalize on peak months by offering loyalty bonuses or exclusive deals for repeat customers to maintain momentum.
+            * Launch new, high-value premium pizzas.
+        """)
 
     st.sidebar.markdown("---")
     st.sidebar.info("Dashboard created using Streamlit, Pandas, Matplotlib, and Seaborn.")
