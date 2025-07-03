@@ -2,23 +2,36 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Sample DataFrame creation (Replace this with your actual monthly_orders DataFrame)
-# monthly_orders = pd.read_csv("your_csv_file.csv")  # Example if you're loading from a file
+# ------------------------------
+# Step 1: Load your dataset
+# ------------------------------
+# Replace this with your actual CSV or database import
+# Example:
+# df = pd.read_csv('pizza_sales.csv')
 
-# Assuming 'monthly_orders' is already defined earlier in your app
-# Step 1: Check if required columns exist
-required_columns = ['month_name', 'Total_Orders']
-if not all(col in monthly_orders.columns for col in required_columns):
-    raise ValueError(f"DataFrame must contain columns: {required_columns}")
+# Simulated dataset for demo purposes
+df = pd.DataFrame({
+    'order_id': [1, 2, 3, 4, 5, 6, 7],
+    'order_date': [
+        '2023-01-15', '2023-02-10', '2023-02-25',
+        '2023-03-05', '2023-03-15', '2023-04-01', '2023-04-20'
+    ]
+})
 
-# Step 2: Drop rows with missing values in the required columns
-monthly_orders = monthly_orders.dropna(subset=['month_name', 'Total_Orders'])
+# ------------------------------
+# Step 2: Convert order_date to datetime and extract month
+# ------------------------------
+df['order_date'] = pd.to_datetime(df['order_date'])
+df['month_name'] = df['order_date'].dt.strftime('%B')
 
-# Step 3: Ensure correct data types
-monthly_orders['Total_Orders'] = pd.to_numeric(monthly_orders['Total_Orders'], errors='coerce')
-monthly_orders = monthly_orders.dropna(subset=['Total_Orders'])
+# ------------------------------
+# Step 3: Group by month to get total orders
+# ------------------------------
+monthly_orders = df.groupby('month_name').agg(Total_Orders=('order_id', 'count')).reset_index()
 
-# Step 4: Ensure 'month_name' is in correct order for plotting
+# ------------------------------
+# Step 4: Order the months correctly
+# ------------------------------
 month_order = ['January', 'February', 'March', 'April', 'May', 'June',
                'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -30,22 +43,25 @@ monthly_orders['month_name'] = pd.Categorical(
 
 monthly_orders = monthly_orders.sort_values('month_name')
 
+# ------------------------------
 # Step 5: Plotting
+# ------------------------------
 plt.figure(figsize=(10, 6))
 sns.set(style="whitegrid")
-ax = sns.lineplot(x='month_name', y='Total_Orders', data=monthly_orders, marker='o')
+ax = sns.lineplot(
+    x='month_name',
+    y='Total_Orders',
+    data=monthly_orders,
+    marker='o'
+)
 
-# Optional: Add axis labels and title
 ax.set_xlabel('Month')
 ax.set_ylabel('Total Orders')
 ax.set_title('Monthly Total Orders')
-
-# Rotate x-axis labels for better readability
 plt.xticks(rotation=45)
 plt.tight_layout()
-
-# Show plot
 plt.show()
+
 
 
 
