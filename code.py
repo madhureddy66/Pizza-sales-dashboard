@@ -207,3 +207,11 @@ ax8.set_ylabel('Pizza Name')
 plt.tight_layout(rect=[0, 0.03, 1, 0.98]) # Adjust layout to make space for the overall title
 plt.suptitle('Pizza Sales Dashboard', y=1.00, fontsize=20, weight='bold')
 plt.show()
+   
+
+
+
+
+
+
+
