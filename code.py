@@ -1,66 +1,39 @@
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+import numpy as np
 
-# ------------------------------
-# Step 1: Load your dataset
-# ------------------------------
-# Replace this with your actual CSV or database import
-# Example:
-# df = pd.read_csv('pizza_sales.csv')
+# Load the dataset
+df = pd.read_csv("pizza_sales.csv")
 
-# Simulated dataset for demo purposes
-df = pd.DataFrame({
-    'order_id': [1, 2, 3, 4, 5, 6, 7],
-    'order_date': [
-        '2023-01-15', '2023-02-10', '2023-02-25',
-        '2023-03-05', '2023-03-15', '2023-04-01', '2023-04-20'
-    ]
-})
-
-# ------------------------------
-# Step 2: Convert order_date to datetime and extract month
-# ------------------------------
+# Convert 'order_date' and 'order_time' to datetime
 df['order_date'] = pd.to_datetime(df['order_date'])
-df['month_name'] = df['order_date'].dt.strftime('%B')
+df['order_time'] = pd.to_datetime(df['order_time'], format='%H:%M:%S').dt.time
 
-# ------------------------------
-# Step 3: Group by month to get total orders
-# ------------------------------
-monthly_orders = df.groupby('month_name').agg(Total_Orders=('order_id', 'count')).reset_index()
+# Extract additional time features
+df['hour'] = pd.to_datetime(df['order_time'], format='%H:%M:%S').dt.hour
+df['day_of_week'] = df['order_date'].dt.day_name()
+df['week_number'] = df['order_date'].dt.isocalendar().week
+df['month'] = df['order_date'].dt.month_name()
 
-# ------------------------------
-# Step 4: Order the months correctly
-# ------------------------------
-month_order = ['January', 'February', 'March', 'April', 'May', 'June',
-               'July', 'August', 'September', 'October', 'November', 'December']
+# Calculate total price
+df['total_price'] = df['unit_price'] * df['quantity']
 
-monthly_orders['month_name'] = pd.Categorical(
-    monthly_orders['month_name'],
-    categories=month_order,
-    ordered=True
-)
+# Summary metrics
+total_revenue = df['total_price'].sum()
+total_orders = df['order_id'].nunique()
+total_pizzas_sold = df['quantity'].sum()
+avg_order_value = df.groupby('order_id')['total_price'].sum().mean()
+avg_pizzas_per_order = total_pizzas_sold / total_orders
 
-monthly_orders = monthly_orders.sort_values('month_name')
+# Display summary (for validation)
+print(f"Total Revenue: ${total_revenue:,.2f}")
+print(f"Average Order Value: ${avg_order_value:,.2f}")
+print(f"Total Pizzas Sold: {total_pizzas_sold:,.0f}")
+print(f"Total Orders: {total_orders}")
+print(f"Avg Pizzas Per Order: {avg_pizzas_per_order:.2f}")
 
-# ------------------------------
-# Step 5: Plotting
-# ------------------------------
-plt.figure(figsize=(10, 6))
-sns.set(style="whitegrid")
-ax = sns.lineplot(
-    x='month_name',
-    y='Total_Orders',
-    data=monthly_orders,
-    marker='o'
-)
+# Export cleaned data for Tableau
+df.to_csv("cleaned_pizza_sales.csv", index=False)
 
-ax.set_xlabel('Month')
-ax.set_ylabel('Total Orders')
-ax.set_title('Monthly Total Orders')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
 
 
 
