@@ -24,6 +24,18 @@ df['total_price'] = pd.to_numeric(df['total_price'], errors='coerce')
 # Drop rows with NaT in 'order_date' or NaN in 'total_price' after conversion
 df.dropna(subset=['order_date', 'total_price'], inplace=True)
 
+# --- DEBUGGING STEP 1: Check DataFrame after initial cleaning ---
+print("\n--- Debugging: DataFrame after initial cleaning ---")
+print(f"Is DataFrame empty? {df.empty}")
+if not df.empty:
+    print("First 5 rows of DataFrame:")
+    print(df.head())
+    print("\nDataFrame Info:")
+    df.info()
+else:
+    print("DataFrame is empty after dropping NA values. Please check your CSV data or cleaning steps.")
+    exit() # Exit if DataFrame is empty to prevent further errors
+
 # Extract hour from order_time (assuming order_time is in a suitable format, e.g., "HH:MM:SS")
 # If order_time is just time string, convert it to datetime and then extract hour.
 # If it's already part of a datetime column, it's simpler. Assuming it's a string like "HH:MM:SS"
@@ -46,6 +58,7 @@ print(f"Total Orders: {total_orders:,}")
 print(f"Average Order Value: ${average_order_value:,.2f}")
 print(f"Total Pizzas Sold: {total_pizzas_sold:,}")
 
+
 # Q7. Monthly Trend for Orders
 df['month_name'] = df['order_date'].dt.month_name()
 monthly_orders = df.groupby('month_name')['order_id'].nunique().reset_index()
@@ -54,6 +67,20 @@ month_order = ['January', 'February', 'March', 'April', 'May', 'June',
                'July', 'August', 'September', 'October', 'November', 'December']
 monthly_orders['month_name'] = pd.Categorical(monthly_orders['month_name'], categories=month_order, ordered=True)
 monthly_orders = monthly_orders.sort_values('month_name')
+
+# --- DEBUGGING STEP 2: Check monthly_orders DataFrame before plotting ---
+print("\n--- Debugging: monthly_orders DataFrame ---")
+print(f"Is monthly_orders DataFrame empty? {monthly_orders.empty}")
+if not monthly_orders.empty:
+    print("First 5 rows of monthly_orders:")
+    print(monthly_orders.head())
+    print("\nmonthly_orders Info:")
+    monthly_orders.info()
+else:
+    print("monthly_orders DataFrame is empty. This is likely the cause of the ValueError.")
+    print("Please ensure 'order_date' column has valid dates and 'order_id' has unique values in your CSV.")
+    exit() # Exit if monthly_orders is empty
+
 
 # Q8. % of Sales by Pizza Category
 sales_by_category = df.groupby('pizza_category')['total_price'].sum().reset_index()
@@ -69,6 +96,7 @@ size_order = ['S', 'M', 'L', 'XL', 'XXL'] # Assuming S, M, L, XL, XXL are the si
 sales_by_size['pizza_size'] = pd.Categorical(sales_by_size['pizza_size'], categories=size_order, ordered=True)
 sales_by_size = sales_by_size.sort_values('pizza_size').dropna() # Drop any NaN introduced by size_order if not all sizes are present
 
+
 # Top 5 Best Sellers by Revenue and Quantity
 top_5_revenue = df.groupby('pizza_name')['total_price'].sum().nlargest(5).reset_index()
 top_5_quantity = df.groupby('pizza_name')['quantity'].sum().nlargest(5).reset_index()
@@ -82,7 +110,9 @@ daily_orders = df.groupby(df['order_date'].dt.date)['order_id'].nunique().reset_
 daily_orders.columns = ['Order_Date', 'Total_Orders']
 daily_orders['Order_Date'] = pd.to_datetime(daily_orders['Order_Date']) # Convert back to datetime for plotting
 
+
 # Hourly Trend for Total Orders
+# The 'order_hour' column is already created and cleaned above
 hourly_orders = df.groupby('order_hour')['order_id'].nunique().reset_index()
 hourly_orders.columns = ['Order_Hour', 'Total_Orders']
 
@@ -171,8 +201,8 @@ ax8.set_title('Top 5 Best Sellers by Quantity')
 ax8.set_xlabel('Total Quantity Sold')
 ax8.set_ylabel('Pizza Name')
 
-# Note: Bottom 5 by Quantity is not explicitly included in the grid to keep it manageable,
-# but the calculation is present and can be plotted similarly if desired.
+# Note: Bottom 5 by Quantity calculation is present but not explicitly plotted in the current grid
+# to keep the dashboard layout manageable. You can add it similarly if needed.
 
 plt.tight_layout(rect=[0, 0.03, 1, 0.98]) # Adjust layout to make space for the overall title
 plt.suptitle('Pizza Sales Dashboard', y=1.00, fontsize=20, weight='bold')
